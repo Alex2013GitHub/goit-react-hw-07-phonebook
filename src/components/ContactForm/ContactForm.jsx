@@ -1,46 +1,32 @@
-import React, { useState } from 'react';
-import { Form, Label, Input, Button } from './ContactForm.styled';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectorContacts } from 'redux/selector';
 import { addContact } from 'redux/contactSlice';
-import { nanoid } from '@reduxjs/toolkit';
+
+import { Form, Label, Input, Button } from './ContactForm.styled';
 
 const ContactForm = () => {
   const contacts = useSelector(selectorContacts);
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
   const dispatch = useDispatch();
-
-  const handleInputChange = event => {
-    const { name, value } = event.target;
-    if (name === 'name') {
-      setName(value);
-    } else if (name === 'number') {
-      setNumber(value);
-    }
-  };
-
-  const handleAddNewContact = formData => {
-    const isNameExist = contacts.some(
-      contact => contact.name.toLowerCase() === formData.name.toLowerCase()
-    );
-
-    if (isNameExist) {
-      alert(`${formData.name} is already in contacts.`);
-    } else {
-      const newContact = {
-        id: nanoid(),
-        ...formData,
-      };
-      dispatch(addContact(newContact));
-      setName('');
-      setNumber('');
-    }
-  };
 
   const handleSubmit = event => {
     event.preventDefault();
-    handleAddNewContact({ name, number });
+
+    const name = event.currentTarget.elements.name.value;
+    const number = event.currentTarget.elements.number.value;
+
+    const isNameExist = contacts.some(
+      contact => contact.name.toLowerCase() === name.toLowerCase()
+    );
+
+    if (isNameExist) {
+      alert(`${name} is already in contacts.`);
+    }
+    const newContact = {
+      name,
+      number,
+    };
+    dispatch(addContact(newContact));
+    event.currentTarget.reset();
   };
 
   return (
@@ -49,8 +35,6 @@ const ContactForm = () => {
         <Label>
           <span>Name</span>
           <Input
-            onChange={handleInputChange}
-            value={name}
             name="name"
             type="text"
             required
@@ -59,8 +43,6 @@ const ContactForm = () => {
           />
           <span>Number</span>
           <Input
-            onChange={handleInputChange}
-            value={number}
             type="tel"
             name="number"
             required
